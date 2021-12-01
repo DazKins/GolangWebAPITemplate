@@ -1,26 +1,29 @@
 package main
 
 import (
-	"CarAPI/handler"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-type CarAPI struct {
-	CarHandler handler.CarHandler
+type carHandler interface {
+	Get(w http.ResponseWriter, r *http.Request)
 }
 
-func NewCarAPI(carHandler handler.CarHandler) CarAPI {
-	return CarAPI{
-		CarHandler: carHandler,
+type carAPI struct {
+	carHandler carHandler
+}
+
+func NewCarAPI(carHandler carHandler) carAPI {
+	return carAPI{
+		carHandler: carHandler,
 	}
 }
 
-func (api CarAPI) Run() {
+func (api carAPI) Run() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/car/{id}", api.CarHandler.Get)
+	r.HandleFunc("/car/{id}", api.carHandler.Get)
 
 	http.ListenAndServe(":3000", r)
 }

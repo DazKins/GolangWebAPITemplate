@@ -1,24 +1,24 @@
 package handler
 
 import (
-	"CarAPI/service"
+	"CarAPI/model"
 	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-type CarHandler interface {
-	Get(w http.ResponseWriter, r *http.Request)
+type carFetcher interface {
+	FetchCar(carId string) (*model.Car, error)
 }
 
 type carHandler struct {
-	DvlaService service.DvlaService
+	carFetcher carFetcher
 }
 
-func NewCarHandler(dvlaService service.DvlaService) CarHandler {
+func NewCarHandler(carFetcher carFetcher) carHandler {
 	return carHandler{
-		DvlaService: dvlaService,
+		carFetcher: carFetcher,
 	}
 }
 
@@ -32,7 +32,7 @@ func (api carHandler) Get(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Car ID was not provided!"))
 	}
 
-	car, err := api.DvlaService.GetCar(id)
+	car, err := api.carFetcher.FetchCar(id)
 
 	if err != nil {
 	}

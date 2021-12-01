@@ -2,6 +2,7 @@ package service
 
 import (
 	"CarAPI/config"
+	"CarAPI/model"
 	"errors"
 	"fmt"
 	"log"
@@ -9,30 +10,20 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type DvlaService interface {
-	GetCar(carId string) (*Car, error)
-}
-
 type dvlaService struct {
-	Config config.Config
-	Client *resty.Client
+	config config.Config
+	client *resty.Client
 }
 
-type Car struct {
-	Id           string `json:"id"`
-	Manafacturer string `json:"manafacturer"`
-	Colour       string `json:"colour"`
-}
-
-func NewDvlaService(config config.Config, client *resty.Client) DvlaService {
+func NewDvlaService(config config.Config, client *resty.Client) dvlaService {
 	return dvlaService{
-		Config: config,
-		Client: client,
+		config: config,
+		client: client,
 	}
 }
 
-func (service dvlaService) GetCar(carId string) (*Car, error) {
-	getCarEndpoint := fmt.Sprintf("%s/car/%s", service.Config.DvlaApiUrl, carId)
+func (service dvlaService) FetchCar(carId string) (*model.Car, error) {
+	getCarEndpoint := fmt.Sprintf("%s/car/%s", service.config.DvlaApiUrl, carId)
 
 	type ResponseModel struct {
 		CarId        string `json:"carId"`
@@ -40,7 +31,7 @@ func (service dvlaService) GetCar(carId string) (*Car, error) {
 		Color        string `json:"color"`
 	}
 
-	resp, err := service.Client.R().
+	resp, err := service.client.R().
 		SetResult(&ResponseModel{}).
 		Get(getCarEndpoint)
 
@@ -51,7 +42,7 @@ func (service dvlaService) GetCar(carId string) (*Car, error) {
 
 	car := resp.Result().(*ResponseModel)
 
-	return &Car{
+	return &model.Car{
 		Id:           car.CarId,
 		Manafacturer: car.Manafacturer,
 		Colour:       car.Color,
