@@ -11,7 +11,7 @@ type CarAPI struct {
 	CarHandler handler.CarHandler
 }
 
-func NewServer(carHandler handler.CarHandler) CarAPI {
+func NewCarAPI(carHandler handler.CarHandler) CarAPI {
 	return CarAPI{
 		CarHandler: carHandler,
 	}
