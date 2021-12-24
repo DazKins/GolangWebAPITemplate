@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/google/uuid"
 )
 
 type dvlaService struct {
@@ -22,8 +23,8 @@ func NewDvlaService(config config.Config, client *resty.Client) dvlaService {
 	}
 }
 
-func (service dvlaService) FetchCar(carId string) (*model.Car, error) {
-	getCarEndpoint := fmt.Sprintf("%s/car/%s", service.config.DvlaApiUrl, carId)
+func (service dvlaService) FetchCar(id string) (*model.Car, error) {
+	getCarEndpoint := fmt.Sprintf("%s/car/%s", service.config.DvlaApiUrl, id)
 
 	type ResponseModel struct {
 		CarId        string `json:"carId"`
@@ -40,11 +41,17 @@ func (service dvlaService) FetchCar(carId string) (*model.Car, error) {
 		return nil, errors.New("Failed to fetch car")
 	}
 
-	car := resp.Result().(*ResponseModel)
+	responseBody := resp.Result().(*ResponseModel)
+
+	carId, err := uuid.Parse(responseBody.CarId)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing response car ID: %w", err)
+	}
 
 	return &model.Car{
-		Id:           car.CarId,
-		Manafacturer: car.Manafacturer,
-		Colour:       car.Color,
+		Id:           model.CarId(carId),
+		Manafacturer: model.Manafacturer(responseBody.Manafacturer),
+		Colour:       model.Colour(responseBody.Color),
 	}, nil
 }

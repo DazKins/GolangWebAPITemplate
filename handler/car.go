@@ -37,7 +37,7 @@ func (api carHandler) Get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 	}
 
-	body, _ := json.Marshal(car)
+	body, _ := json.Marshal(car.ToDto())
 
 	w.WriteHeader(200)
 	w.Write(body)
